@@ -32,8 +32,8 @@ export class ArticlesController {
 
   @Get('recent')
   async findRecent(
-    @Query('limit', ParseIntPipe) limit: number = 10,
-    @Query('skip', ParseIntPipe) skip: number = 0,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
+    @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
   ) {
     return this.articlesService.findRecent(limit, skip);
   }
@@ -41,8 +41,8 @@ export class ArticlesController {
   @Get('tag/:tag')
   async findByTag(
     @Param('tag') tag: string,
-    @Query('limit', ParseIntPipe) limit: number = 10,
-    @Query('skip', ParseIntPipe) skip: number = 0,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
+    @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
   ) {
     return this.articlesService.findByTag(tag, limit, skip);
   }
