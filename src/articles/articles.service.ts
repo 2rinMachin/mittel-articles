@@ -5,13 +5,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Article } from './entities/article.entity';
 import { Model } from 'mongoose';
 import { AuthUser } from 'src/common/interfaces/auth-user.interface';
-import { Comment } from 'src/comments/entities/comment.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ArticleDeletedEvent } from './events/article-deleted.event';
 
 @Injectable()
 export class ArticlesService {
   constructor(
     @InjectModel(Article.name) private readonly articleModel: Model<Article>,
-    @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(
@@ -32,11 +33,25 @@ export class ArticlesService {
   }
 
   async findRecent(limit: number = 10, skip: number = 0): Promise<Article[]> {
-    return this.articleModel.find().sort({ _id: -1 }).skip(skip).limit(limit).exec();
+    return this.articleModel
+      .find()
+      .sort({ _id: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
   }
 
-  async findByTag(tag: string, limit: number = 10, skip: number = 0): Promise<Article[]> {
-    return this.articleModel.find({tags: tag}).sort({ _id: -1 }).skip(skip).limit(limit).exec();
+  async findByTag(
+    tag: string,
+    limit: number = 10,
+    skip: number = 0,
+  ): Promise<Article[]> {
+    return this.articleModel
+      .find({ tags: tag })
+      .sort({ _id: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
   }
 
   async update(
@@ -50,10 +65,23 @@ export class ArticlesService {
     return article;
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     const article = await this.articleModel.findById(id).exec();
     if (!article) throw new NotFoundException('Article not found');
-    await this.commentModel.deleteMany({ postId: article._id });
     await this.articleModel.findByIdAndDelete(id);
+    this.eventEmitter.emit('article.deleted', new ArticleDeletedEvent(id));
+  }
+
+  async incrementCommentsCount(articleId: string): Promise<void> {
+    const article = await this.articleModel.findByIdAndUpdate(articleId, {
+      $inc: { commentsCount: 1 },
+    });
+    if (!article) throw new NotFoundException('Article not found');
+  }
+
+  async decrementCommentsCount(articleId: string): Promise<void> {
+    await this.articleModel.findByIdAndUpdate(articleId, {
+      $inc: { commentsCount: -1 },
+    });
   }
 }

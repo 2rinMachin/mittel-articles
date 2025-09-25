@@ -8,6 +8,7 @@ import {
   Put,
   Req,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
@@ -30,17 +31,20 @@ export class ArticlesController {
   }
 
   @Get('recent')
-  async findRecent(@Query('limit') limit = 10, @Query('skip') skip = 0) {
-    return this.articlesService.findRecent(+limit, +skip);
+  async findRecent(
+    @Query('limit', ParseIntPipe) limit: number = 10,
+    @Query('skip', ParseIntPipe) skip: number = 0,
+  ) {
+    return this.articlesService.findRecent(limit, skip);
   }
 
   @Get('tag/:tag')
   async findByTag(
     @Param('tag') tag: string,
-    @Query('limit') limit = 10,
-    @Query('skip') skip = 0,
+    @Query('limit', ParseIntPipe) limit: number = 10,
+    @Query('skip', ParseIntPipe) skip: number = 0,
   ) {
-    return this.articlesService.findByTag(tag, +limit, +skip);
+    return this.articlesService.findByTag(tag, limit, skip);
   }
 
   @Get(':id')

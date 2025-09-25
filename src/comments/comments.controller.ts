@@ -1,42 +1,61 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
-  Patch,
   Param,
+  Get,
+  Query,
+  Put,
+  Req,
+  UseGuards,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { AuthGuard } from '../common/auth.guard';
+import { AuthUser } from '../common/interfaces/auth-user.interface';
+import { Comment } from './entities/comment.entity';
+
+interface RequestWithUser extends Request {
+  user: AuthUser;
+}
 
 @Controller('comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
+  @UseGuards(AuthGuard)
   @Post()
-  create(@Body() createCommentDto: CreateCommentDto) {
-    return this.commentsService.create(createCommentDto);
+  async create(
+    @Body() dto: CreateCommentDto,
+    @Req() req: RequestWithUser,
+  ): Promise<Comment> {
+    return this.commentsService.create(dto, req.user);
   }
 
-  @Get()
-  findAll() {
-    return this.commentsService.findAll();
+  @Get('post/:postId')
+  async findByArticle(
+    @Param('postId') postId: string,
+    @Query('limit', ParseIntPipe) limit: number = 10,
+    @Query('skip', ParseIntPipe) skip: number = 0,
+  ): Promise<Comment[]> {
+    return this.commentsService.findByArticle(postId, limit, skip);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.commentsService.findOne(+id);
+  @UseGuards(AuthGuard)
+  @Put(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateCommentDto,
+  ): Promise<Comment> {
+    return this.commentsService.update(id, dto);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCommentDto: UpdateCommentDto) {
-    return this.commentsService.update(+id, updateCommentDto);
-  }
-
+  @UseGuards(AuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.commentsService.remove(+id);
+  async delete(@Param('id') id: string): Promise<void> {
+    return this.commentsService.remove(id);
   }
 }

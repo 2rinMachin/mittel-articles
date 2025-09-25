@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsString, MinLength } from "class-validator";
+import { IsArray, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 export class CreateArticleDto {
   @IsNotEmpty()
@@ -10,7 +10,7 @@ export class CreateArticleDto {
   @IsString()
   @MinLength(2)
   readonly content: string;
-  
+
   @IsArray()
   readonly tags: string;
 }
