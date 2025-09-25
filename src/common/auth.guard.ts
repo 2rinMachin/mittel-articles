@@ -15,20 +15,18 @@ interface RequestWithUser extends Request {
 export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<RequestWithUser>();
-    const authHeader = req.headers['authorization'];
+    const authHeader = req.headers['Authorization'];
 
     if (!authHeader) throw new UnauthorizedException('Missing token');
 
     const token = authHeader.split(' ')[1];
     try {
-      const { data } = await axios.get<{
+      const { data } = await axios.post<{
         id: string;
         first_name: string;
         last_name: string;
         email: string;
-      }>('http://users-api:3000/users/self', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      }>('http://users-api:3000/introspect', { token });
 
       req.user = {
         id: data.id,
