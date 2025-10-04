@@ -26,15 +26,13 @@ export class AuthGuard implements CanActivate {
     try {
       const { data } = await axios.post<{
         id: string;
-        first_name: string;
-        last_name: string;
+        username: string;
         email: string;
       }>(process.env.USERS_URL, { token });
 
       req.user = {
         id: data.id,
-        firstName: data.first_name,
-        lastName: data.last_name,
+        username: data.username,
         email: data.email,
       };
       return true;

@@ -1,5 +1,5 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Document } from "mongoose";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Article extends Document {
@@ -15,16 +15,14 @@ export class Article extends Document {
   @Prop({
     type: {
       id: { type: String, required: true },
-      firstName: String,
-      lastName: String,
+      username: String,
       email: String,
     },
     required: true,
   })
   author: {
     id: string;
-    firstName: string;
-    lastName: string;
+    username: string;
     email: string;
   };
 

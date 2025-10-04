@@ -30,7 +30,7 @@ export class ArticlesController {
     return this.articlesService.create(dto, req.user);
   }
 
-  @Get('search')
+  @Get()
   async search(@Query() query: SearchArticlesDto) {
     return this.articlesService.searchArticles(query);
   }
