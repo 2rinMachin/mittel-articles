@@ -15,7 +15,7 @@ interface RequestWithUser extends Request {
 export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<RequestWithUser>();
-    const authHeader = req.headers['Authorization'];
+    const authHeader = req.headers.get('Authorization');
 
     if (!authHeader) throw new UnauthorizedException('Missing token');
 
@@ -35,7 +35,7 @@ export class AuthGuard implements CanActivate {
         email: data.email,
       };
       return true;
-    } catch (e) {
+    } catch {
       throw new UnauthorizedException('Invalid token');
     }
   }
