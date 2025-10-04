@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import axios from 'axios';
 import { AuthUser } from './interfaces/auth-user.interface';
+import { Request } from 'express';
 
 interface RequestWithUser extends Request {
   user?: AuthUser;
@@ -15,20 +16,24 @@ interface RequestWithUser extends Request {
 export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<RequestWithUser>();
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.authorization;
 
     if (!authHeader) throw new UnauthorizedException('Missing token');
 
-    const token = authHeader.split(' ')[1];
-
     if (!process.env.USERS_URL) throw new Error('USERS_URL not found');
 
+    interface SerializedUser {
+      id: string;
+      first_name: string;
+      last_name: string;
+      email: string;
+    }
+
     try {
-      const { data } = await axios.post<{
-        id: string;
-        username: string;
-        email: string;
-      }>(process.env.USERS_URL, { token });
+      const { data } = await axios.post<SerializedUser>(
+        `${process.env.USERS_URL}/introspect`,
+        { token: authHeader },
+      );
 
       req.user = {
         id: data.id,
@@ -36,7 +41,8 @@ export class AuthGuard implements CanActivate {
         email: data.email,
       };
       return true;
-    } catch {
+    } catch (e) {
+      console.error(e);
       throw new UnauthorizedException('Invalid token');
     }
   }
