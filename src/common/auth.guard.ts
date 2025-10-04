@@ -20,13 +20,16 @@ export class AuthGuard implements CanActivate {
     if (!authHeader) throw new UnauthorizedException('Missing token');
 
     const token = authHeader.split(' ')[1];
+
+    if (!process.env.USERS_URL) throw new Error('USERS_URL not found');
+
     try {
       const { data } = await axios.post<{
         id: string;
         first_name: string;
         last_name: string;
         email: string;
-      }>('http://users-api:3000/introspect', { token });
+      }>(process.env.USERS_URL, { token });
 
       req.user = {
         id: data.id,
