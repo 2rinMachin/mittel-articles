@@ -3,10 +3,11 @@ import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Article } from './entities/article.entity';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { AuthUser } from 'src/common/interfaces/auth-user.interface';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ArticleDeletedEvent } from './events/article-deleted.event';
+import { SearchArticlesDto } from './dto/search-articles.dto';
 
 @Injectable()
 export class ArticlesService {
@@ -32,25 +33,22 @@ export class ArticlesService {
     return article;
   }
 
-  async findRecent(limit: number = 10, skip: number = 0): Promise<Article[]> {
-    return this.articleModel
-      .find()
-      .sort({ _id: -1 })
-      .skip(skip)
-      .limit(limit)
-      .exec();
-  }
+  async searchArticles(dto: SearchArticlesDto): Promise<Article[]> {
+    const query: FilterQuery<Article> = {};
 
-  async findByTag(
-    tag: string,
-    limit: number = 10,
-    skip: number = 0,
-  ): Promise<Article[]> {
+    if (dto.title) {
+      query.title = { $regex: dto.title, $options: 'i' };
+    }
+
+    if (dto.tag) {
+      query.tags = dto.tag;
+    }
+
     return this.articleModel
-      .find({ tags: tag })
+      .find(query)
       .sort({ _id: -1 })
-      .skip(skip)
-      .limit(limit)
+      .skip(dto.skip)
+      .limit(dto.limit)
       .exec();
   }
 

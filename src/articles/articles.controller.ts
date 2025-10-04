@@ -8,13 +8,13 @@ import {
   Put,
   Req,
   UseGuards,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { AuthGuard } from '../common/auth.guard';
 import { AuthUser } from '../common/interfaces/auth-user.interface';
+import { SearchArticlesDto } from './dto/search-articles.dto';
 
 interface RequestWithUser extends Request {
   user: AuthUser;
@@ -30,21 +30,9 @@ export class ArticlesController {
     return this.articlesService.create(dto, req.user);
   }
 
-  @Get('recent')
-  async findRecent(
-    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
-    @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
-  ) {
-    return this.articlesService.findRecent(limit, skip);
-  }
-
-  @Get('tag/:tag')
-  async findByTag(
-    @Param('tag') tag: string,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
-    @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
-  ) {
-    return this.articlesService.findByTag(tag, limit, skip);
+  @Get('search')
+  async search(@Query() query: SearchArticlesDto) {
+    return this.articlesService.searchArticles(query);
   }
 
   @Get(':id')

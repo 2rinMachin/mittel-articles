@@ -38,8 +38,8 @@ export class CommentsController {
   @Get('post/:postId')
   async findByArticle(
     @Param('postId') postId: string,
-    @Query('limit', ParseIntPipe) limit: number = 10,
-    @Query('skip', ParseIntPipe) skip: number = 0,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
+    @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
   ): Promise<Comment[]> {
     return this.commentsService.findByArticle(postId, limit, skip);
   }
