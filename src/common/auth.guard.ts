@@ -22,27 +22,15 @@ export class AuthGuard implements CanActivate {
 
     if (!process.env.USERS_URL) throw new Error('USERS_URL not found');
 
-    interface SerializedUser {
-      id: string;
-      first_name: string;
-      last_name: string;
-      email: string;
-    }
-
     try {
-      const { data } = await axios.post<SerializedUser>(
+      const { data } = await axios.post<AuthUser>(
         `${process.env.USERS_URL}/introspect`,
         { token: authHeader },
       );
 
-      req.user = {
-        id: data.id,
-        username: data.username,
-        email: data.email,
-      };
+      req.user = data;
       return true;
-    } catch (e) {
-      console.error(e);
+    } catch {
       throw new UnauthorizedException('Invalid token');
     }
   }
