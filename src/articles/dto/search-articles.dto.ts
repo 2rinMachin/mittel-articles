@@ -11,6 +11,10 @@ export class SearchArticlesDto {
   tag?: string;
 
   @IsOptional()
+  @IsString()
+  authorId?: string;
+
+  @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(0)
