@@ -57,7 +57,7 @@ export class ArticlesService {
     return this.articleModel
       .find(query)
       .select('-content')
-      .sort({ _id: -1 })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .exec();

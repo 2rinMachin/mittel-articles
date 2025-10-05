@@ -43,7 +43,7 @@ export class CommentsService {
   async findByArticle(postId: string, limit: number = 10, skip: number = 0) {
     return this.commentModel
       .find({ postId })
-      .sort({ _id: -1 })
+      .sort({ createdAt: 1 })
       .skip(skip)
       .limit(limit)
       .exec();
