@@ -51,7 +51,7 @@ export class ArticlesService {
     const limit = dto.limit && dto.limit > 0 ? dto.limit : 10;
     const skip = dto.skip && dto.skip >= 0 ? dto.skip : 0;
     if (dto.authorId) {
-      query.author = { id: dto.authorId };
+      query['author.id'] = dto.authorId;
     }
 
     return this.articleModel
