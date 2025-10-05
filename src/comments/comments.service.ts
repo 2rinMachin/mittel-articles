@@ -48,17 +48,27 @@ export class CommentsService {
   async update(
     id: string,
     updateCommentDto: UpdateCommentDto,
+    user: AuthUser,
   ): Promise<Comment> {
-    const comment = await this.commentModel
-      .findByIdAndUpdate(id, updateCommentDto, { new: true })
-      .exec();
+    const comment = await this.commentModel.findById(id).exec();
     if (!comment) throw new NotFoundException('Comment not found');
-    return comment;
+
+    if (comment.author.id !== user.id) {
+      throw new UnauthorizedException('You are not the author of this comment');
+    }
+
+    comment.content = updateCommentDto.content ?? comment.content;
+    return comment.save();
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, user: AuthUser): Promise<void> {
     const comment = await this.commentModel.findById(id);
     if (!comment) throw new NotFoundException('Comment not found');
+
+    if (comment.author.id !== user.id) {
+      throw new UnauthorizedException('You are not the author of this comment');
+    }
+
     await this.commentModel.findByIdAndDelete(id);
     this.eventEmitter.emit(
       'comment.deleted',

@@ -44,28 +44,45 @@ export class ArticlesService {
       query.tags = dto.tag;
     }
 
+    const limit = dto.limit && dto.limit > 0 ? dto.limit : 10;
+    const skip = dto.skip && dto.skip >= 0 ? dto.skip : 0;
+
     return this.articleModel
       .find(query)
+      .select('-content')
       .sort({ _id: -1 })
-      .skip(dto.skip)
-      .limit(dto.limit)
+      .skip(skip)
+      .limit(limit)
       .exec();
   }
 
   async update(
     id: string,
     updateArticleDto: UpdateArticleDto,
+    user: AuthUser,
   ): Promise<Article> {
-    const article = await this.articleModel
-      .findByIdAndUpdate(id, updateArticleDto, { new: true })
-      .exec();
-    if (!article) throw new NotFoundException('Article not found');
-    return article;
-  }
-
-  async remove(id: string): Promise<void> {
     const article = await this.articleModel.findById(id).exec();
     if (!article) throw new NotFoundException('Article not found');
+
+    if (article.author.id !== user.id) {
+      throw new UnauthorizedException('You are not the author of this article');
+    }
+
+    article.title = updateArticleDto.title ?? article.title;
+    article.content = updateArticleDto.content ?? article.content;
+    article.tags = updateArticleDto.tags ?? article.tags;
+
+    return article.save();
+  }
+
+  async remove(id: string, user: AuthUser): Promise<void> {
+    const article = await this.articleModel.findById(id).exec();
+    if (!article) throw new NotFoundException('Article not found');
+
+    if (article.author.id !== user.id) {
+      throw new UnauthorizedException('You are not the author of this article');
+    }
+
     await this.articleModel.findByIdAndDelete(id);
     this.eventEmitter.emit('article.deleted', new ArticleDeletedEvent(id));
   }

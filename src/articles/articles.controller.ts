@@ -8,6 +8,7 @@ import {
   Put,
   Req,
   UseGuards,
+  Delete,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
@@ -42,7 +43,17 @@ export class ArticlesController {
 
   @UseGuards(AuthGuard)
   @Put(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateArticleDto) {
-    return this.articlesService.update(id, dto);
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateArticleDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.articlesService.update(id, dto, req.user);
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete(':id')
+  async delete(@Param('id') id: string, @Req() req: RequestWithUser) {
+    return this.articlesService.remove(id, req.user);
   }
 }

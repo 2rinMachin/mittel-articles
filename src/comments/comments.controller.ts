@@ -49,13 +49,17 @@ export class CommentsController {
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateCommentDto,
+    @Req() req: RequestWithUser,
   ): Promise<Comment> {
-    return this.commentsService.update(id, dto);
+    return this.commentsService.update(id, dto, req.user);
   }
 
   @UseGuards(AuthGuard)
   @Delete(':id')
-  async delete(@Param('id') id: string): Promise<void> {
-    return this.commentsService.remove(id);
+  async delete(
+    @Param('id') id: string,
+    @Req() req: RequestWithUser,
+  ): Promise<void> {
+    return this.commentsService.remove(id, req.user);
   }
 }
