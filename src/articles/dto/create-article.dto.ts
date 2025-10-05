@@ -12,5 +12,5 @@ export class CreateArticleDto {
   readonly content: string;
 
   @IsArray()
-  readonly tags: string;
+  readonly tags: string[];
 }
