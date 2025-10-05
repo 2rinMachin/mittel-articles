@@ -4,7 +4,7 @@ import { Document, Types } from 'mongoose';
 @Schema({ timestamps: true })
 export class Comment extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Article', required: true })
-  postId: string;
+  postId: Types.ObjectId;
 
   @Prop({ required: true })
   content: string;

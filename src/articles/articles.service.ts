@@ -7,7 +7,7 @@ import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Article } from './entities/article.entity';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { AuthUser } from 'src/common/interfaces/auth-user.interface';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ArticleDeletedEvent } from './events/article-deleted.event';
@@ -94,14 +94,14 @@ export class ArticlesService {
     this.eventEmitter.emit('article.deleted', new ArticleDeletedEvent(id));
   }
 
-  async incrementCommentsCount(articleId: string): Promise<void> {
+  async incrementCommentsCount(articleId: Types.ObjectId): Promise<void> {
     const article = await this.articleModel.findByIdAndUpdate(articleId, {
       $inc: { commentsCount: 1 },
     });
     if (!article) throw new NotFoundException('Article not found');
   }
 
-  async decrementCommentsCount(articleId: string): Promise<void> {
+  async decrementCommentsCount(articleId: Types.ObjectId): Promise<void> {
     await this.articleModel.findByIdAndUpdate(articleId, {
       $inc: { commentsCount: -1 },
     });

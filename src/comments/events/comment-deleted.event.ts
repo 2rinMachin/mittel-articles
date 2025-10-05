@@ -1,3 +1,5 @@
+import { Types } from 'mongoose';
+
 export class CommentDeletedEvent {
-  constructor(public readonly articleId: string) {}
+  constructor(public readonly articleId: Types.ObjectId) {}
 }

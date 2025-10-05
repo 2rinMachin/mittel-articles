@@ -7,7 +7,7 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment } from './entities/comment.entity';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { ArticlesService } from 'src/articles/articles.service';
 import { AuthUser } from 'src/common/interfaces/auth-user.interface';
 import { CommentCreatedEvent } from './events/comment-created.event';
@@ -35,14 +35,14 @@ export class CommentsService {
     await comment.save();
     this.eventEmitter.emit(
       'comment.created',
-      new CommentCreatedEvent(createCommentDto.postId),
+      new CommentCreatedEvent(comment.postId),
     );
     return comment;
   }
 
   async findByArticle(postId: string, limit: number = 10, skip: number = 0) {
     return this.commentModel
-      .find({ postId })
+      .find({ postId: new Types.ObjectId(postId) })
       .sort({ createdAt: 1 })
       .skip(skip)
       .limit(limit)
