@@ -30,6 +30,7 @@ export class CommentsService {
     if (!article) throw new NotFoundException('Article not found');
     const comment = new this.commentModel({
       ...createCommentDto,
+      postId: new Types.ObjectId(createCommentDto.postId),
       author,
     });
     await comment.save();
@@ -43,7 +44,7 @@ export class CommentsService {
   async findByArticle(postId: string, limit: number = 10, skip: number = 0) {
     return this.commentModel
       .find({ postId: new Types.ObjectId(postId) })
-      .sort({ createdAt: 1 })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .exec();
